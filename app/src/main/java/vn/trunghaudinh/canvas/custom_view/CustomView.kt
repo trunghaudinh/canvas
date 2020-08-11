@@ -5,38 +5,57 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
-import java.util.jar.Attributes
+import kotlin.math.min
 
-class CustomView(context : Context, attrs : AttributeSet) : View(context,attrs) {
-    private var paint : Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var widthSize : Int = 0
-    private var heightSize : Int = 0
+
+class CustomView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+    private var paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    var desiredSize = 150
 
     init {
         paint.run {
             color = Color.RED
-            strokeWidth  = 10f
+            strokeWidth = 10f
             style = Paint.Style.STROKE
         }
+
+//        desiredSize = width/3
     }
 
-//    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-//        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-//        val widthMod = MeasureSpec.getMode(widthMeasureSpec)
-//        val heightMod = MeasureSpec.getMode(heightMeasureSpec)
-//
-//        widthSize = MeasureSpec.getSize(widthMeasureSpec)/3
-//        val m = MeasureSpec.UNSPECIFIED
-//        Log.i("smiles ","Width Mod = $widthMod ||  height mod = $heightMod")
-//    }
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        setMeasuredDimension(
+            measureDimension(desiredSize, widthMeasureSpec),
+            measureDimension(desiredSize, heightMeasureSpec)
+        )
+    }
+
+    private fun measureDimension(desiredSize: Int, measureSpec: Int): Int {
+        var result: Int
+        val specMode = MeasureSpec.getMode(measureSpec)
+        val specSize = MeasureSpec.getSize(measureSpec)
+
+        result = when (specMode) {
+            MeasureSpec.EXACTLY -> specSize
+            MeasureSpec.AT_MOST -> min(desiredSize, specSize)
+            else -> desiredSize
+        }
+        return result
+    }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        Log.i("smie", "onDraw: ${convertPixelsToDp(width.toFloat(),context)}  ${convertPixelsToDp(height.toFloat(),context)}")
+        canvas?.drawLine(0F, 100f, 100f, 100f, paint)
 
-//        canvas?.drawLine(0F,200f,200f,200f,paint)
-//        canvas?.drawCircle(widthSize.toFloat(),widthSize.toFloat(),100f,paint)
+
+    }
+
+    fun convertPixelsToDp(px: Float, context: Context): Float {
+        return px / (context.resources
+            .displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
 
 }
